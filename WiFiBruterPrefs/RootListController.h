@@ -1,4 +1,4 @@
-#include <Preferences/PSListController.h>
+@class PSListController;
 
 @interface RootListController : PSListController
 @end
