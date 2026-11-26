@@ -8,7 +8,6 @@ static NSTimeInterval kMinDelay = 0.5;
 
 static void logMessage(NSString *msg);
 static NSString *iosVersionString(void);
-static BOOL isIOS15OrLater(void);
 static NSDictionary *loadConfig(id self);
 static NSArray *loadPasswords(id self);
 static BOOL isEnabled(id self);
@@ -31,13 +30,6 @@ static void logMessage(NSString *msg) {
 
 static NSString *iosVersionString(void) {
     return [[UIDevice currentDevice] systemVersion];
-}
-
-static BOOL isIOS15OrLater(void) {
-    NSString *ver = iosVersionString();
-    NSArray *parts = [ver componentsSeparatedByString:@"."];
-    NSInteger major = [[parts firstObject] integerValue];
-    return major >= 15;
 }
 
 static NSDictionary *loadConfig(id self) {
