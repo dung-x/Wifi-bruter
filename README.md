@@ -41,24 +41,51 @@ Package: **dungx.wifibruter**
 
 ## Build
 
-Requires Theos on macOS:
+Requires Theos on macOS. Builds three variants:
+
+| Variant | Install Prefix | Package | Use Case |
+|---------|---------------|---------|----------|
+| rootful | `/` | `dungx.wifibruter` | checkra1n, palera1n rootful |
+| rootless | `/var/jb` | `dungx.wifibruter-rootless` | Dopamine, palera1n rootless |
+| roothide | `/var/jb` | `dungx.wifibruter-roothide` | roothide jailbreak |
 
 ```bash
 export THEOS=$HOME/theos
+
+# Rootful (default)
 make package
+
+# Rootless
+THEOS_PACKAGE_INSTALL_PREFIX=/var/jb make package
+
+# Roothide
+THEOS_PACKAGE_INSTALL_PREFIX=/var/jb make package
 ```
 
-Produces `dungx.wifibruter_1.0-1_iphoneos-arm64.deb`.
+Produces:
+- `dungx.wifibruter_1.0-1_iphoneos-arm64.deb`
+- `dungx.wifibruter-rootless_1.0-1_iphoneos-arm64.deb`
+- `dungx.wifibruter-roothide_1.0-1_iphoneos-arm64.deb`
 
 ## GitHub Actions
 
-Pushes to `main` trigger a build via `.github/workflows/build.yml`. The `.deb` is uploaded as a workflow artifact.
+Pushes to `main` trigger a matrix build via `.github/workflows/build.yml` producing all three `.deb` variants as workflow artifacts.
 
 ## Install
 
-1. Copy the `.deb` to your jailbroken device.
-2. `dpkg -i dungx.wifibruter_*.deb`
-3. Configure in **Settings > WiFi Bruter**, place your wordlist at the configured path, then respring.
+Choose the `.deb` matching your jailbreak type:
+
+```bash
+# Rootful
+dpkg -i dungx.wifibruter_*.deb
+
+# Rootless / Roothide
+dpkg -i dungx.wifibruter-rootless_*.deb
+# or
+dpkg -i dungx.wifibruter-roothide_*.deb
+```
+
+Configure in **Settings > WiFi Bruter**, place your wordlist at the configured path, then respring.
 
 ## Warning
 

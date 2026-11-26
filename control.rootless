@@ -1,0 +1,8 @@
+Package: dungx.wifibruter-rootless
+Name: WiFiBruter (Rootless)
+Depends: mobilesubstrate, preferenceloader
+Version: 1.0-1
+Architecture: iphoneos-arm64
+Section: Tweaks
+Maintainer: dungx
+Description: Automatically attempts WiFi passcodes from a wordlist on jailbroken iOS. Rootless variant. Configurable from the Settings app. Primarily targets iOS 12 and iOS 15. For authorized security testing only.
