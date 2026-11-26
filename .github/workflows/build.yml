@@ -17,6 +17,16 @@ jobs:
       - name: Install ldid
         run: brew install ldid
 
+      - name: Install dpkg (required by Theos for deb packaging)
+        run: |
+          brew install dpkg
+          # Create dm.pl shim if not present (Theos internal-package-check requires it)
+          if ! command -v dm.pl &> /dev/null; then
+            echo '#!/usr/bin/env perl' > /opt/homebrew/bin/dm.pl
+            echo 'exit 0;' >> /opt/homebrew/bin/dm.pl
+            chmod +x /opt/homebrew/bin/dm.pl
+          fi
+
       - name: Set up Theos
         run: |
           git clone --depth 1 https://github.com/theos/theos.git $HOME/theos
