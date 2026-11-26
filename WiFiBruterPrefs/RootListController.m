@@ -4,7 +4,8 @@
 
 - (id)specifiers {
     if (!_specifiers) {
-        _specifiers = [self loadSpecifiersFromPlistNamed:@"WiFiBruterPrefs" target:self];
+        NSString *path = [[NSBundle mainBundle] pathForResource:@"WiFiBruterPrefs" ofType:@"plist"];
+        _specifiers = [NSArray arrayWithContentsOfFile:path];
     }
     return _specifiers;
 }
