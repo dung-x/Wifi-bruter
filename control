@@ -1,4 +1,4 @@
-Package: com.kilo.wifibruter
+Package: dungx.wifibruter
 Name: WiFiBruter
 Depends: mobilesubstrate, preferenceloader
 Version: 1.0-1
