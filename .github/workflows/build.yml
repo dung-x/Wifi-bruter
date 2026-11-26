@@ -56,7 +56,7 @@ jobs:
 
       - name: Rename deb for variant
         run: |
-          DEB=$(ls *.deb | head -1)
+          DEB=$(find . -name "*.deb" | head -1)
           if [ "${{ matrix.variant }}" = "rootful" ]; then
             mv "$DEB" "dungx.wifibruter_1.0-1_iphoneos-arm64.deb"
           elif [ "${{ matrix.variant }}" = "rootless" ]; then
