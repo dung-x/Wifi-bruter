@@ -5,7 +5,7 @@ WiFiBruterPrefs_FILES = RootListController.m
 WiFiBruterPrefs_INSTALL_PATH = /Library/PreferenceBundles
 WiFiBruterPrefs_FRAMEWORKS = UIKit
 WiFiBruterPrefs_CFLAGS = -fobjc-arc
-WiFiBruterPrefs_ARCHS = arm64
+WiFiBruterPrefs_ARCHS = arm
 
 include $(THEOS_MAKE_PATH)/bundle.mk
 
