@@ -26,8 +26,18 @@ WiFiBruter/          # Main tweak (MobileSubstrate dylib)
 WiFiBruterPrefs/     # PreferenceBundle (Settings app pane)
 .github/workflows/   # GitHub Actions build (macOS, Theos)
 wordlist.txt         # Sample wordlist
-control              # Debian control file
+control              # Debian control file (Package: dungx.wifibruter)
 ```
+
+## Sileo / Cydia repo
+
+Add the **dungxrepo** source to Sileo or Cydia:
+
+```
+https://dung-x.github.io/dungxrepo/
+```
+
+Package: **dungx.wifibruter**
 
 ## Build
 
@@ -38,7 +48,7 @@ export THEOS=$HOME/theos
 make package
 ```
 
-Produces `com.kilo.wifibruter_1.0-1_iphoneos-arm64.deb`.
+Produces `dungx.wifibruter_1.0-1_iphoneos-arm64.deb`.
 
 ## GitHub Actions
 
@@ -47,7 +57,7 @@ Pushes to `main` trigger a build via `.github/workflows/build.yml`. The `.deb` i
 ## Install
 
 1. Copy the `.deb` to your jailbroken device.
-2. `dpkg -i com.kilo.wifibruter_*.deb`
+2. `dpkg -i dungx.wifibruter_*.deb`
 3. Configure in **Settings > WiFi Bruter**, place your wordlist at the configured path, then respring.
 
 ## Warning
