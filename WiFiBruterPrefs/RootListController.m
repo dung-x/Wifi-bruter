@@ -10,8 +10,4 @@
     return _specifiers;
 }
 
-- (void)viewDidLoad {
-    [super viewDidLoad];
-}
-
 @end

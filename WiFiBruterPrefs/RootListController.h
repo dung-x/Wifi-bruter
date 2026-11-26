@@ -1,4 +1,8 @@
-@class PSListController;
+#import <UIKit/UIKit.h>
+#import <Foundation/Foundation.h>
 
-@interface RootListController : PSListController
+@interface RootListController : NSObject
+{
+    NSMutableArray *_specifiers;
+}
 @end
