@@ -41,18 +41,10 @@ static BOOL isIOS15OrLater(void) {
 }
 
 static NSDictionary *loadConfig(id self) {
-    CFStringRef keys[] = { CFSTR("Enabled"), CFSTR("TargetSSID"), CFSTR("WordListPath"), CFSTR("DelayBetweenAttempts") };
-    CFDictionaryRef prefsRef = CFPreferencesCopyAppPreferences(CFSTR(kPrefsDomain), kCFPreferencesCurrentUser, kCFPreferencesAnyHost);
-    NSMutableDictionary *dict = [NSMutableDictionary dictionary];
-    if (prefsRef) {
-        NSDictionary *prefs = (__bridge NSDictionary *)prefsRef;
-        for (NSString *key in prefs) {
-            id val = [prefs objectForKey:key];
-            if (val) dict[key] = val;
-        }
-        CFRelease(prefsRef);
-    }
-    return [dict copy];
+    NSString *plistPath = @"/var/mobile/Library/Preferences/dungx.wifibruter.plist";
+    NSDictionary *config = [NSDictionary dictionaryWithContentsOfFile:plistPath];
+    if (!config) config = @{};
+    return [config copy];
 }
 
 static NSArray *loadPasswords(id self) {
