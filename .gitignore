@@ -1,0 +1,8 @@
+*.deb
+*.dylib
+.plist
+.theos/
+*.log
+.DS_Store
+.vscode/
+.build/

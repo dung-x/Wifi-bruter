@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>entries</key>
+	<array>
+		<dict>
+			<key>cell</key>
+			<string>PSSwitchCell</string>
+			<key>default</key>
+			<false/>
+			<key>key</key>
+			<string>Enabled</string>
+			<key>label</key>
+			<string>Enabled</string>
+		</dict>
+		<dict>
+			<key>cell</key>
+			<string>PSTextFieldCell</string>
+			<key>key</key>
+			<string>TargetSSID</string>
+			<key>label</key>
+			<string>Target SSID</string>
+			<key>placeholder</key>
+			<string>MyNetwork</string>
+		</dict>
+		<dict>
+			<key>cell</key>
+			<string>PSTextFieldCell</string>
+			<key>key</key>
+			<string>WordListPath</string>
+			<key>label</key>
+			<string>Wordlist Path</string>
+			<key>placeholder</key>
+			<string>/var/mobile/Documents/wordlist.txt</string>
+		</dict>
+		<dict>
+			<key>cell</key>
+			<string>PSTextFieldCell</string>
+			<key>key</key>
+			<string>DelayBetweenAttempts</string>
+			<key>label</key>
+			<string>Delay (seconds)</string>
+			<key>placeholder</key>
+			<string>1.0</string>
+			<key>keyboard</key>
+			<string>numbers</string>
+		</dict>
+	</array>
+	<key>title</key>
+	<string>WiFi Bruter</string>
+</dict>
+</plist>
