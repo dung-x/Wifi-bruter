@@ -1,4 +1,4 @@
-#import <Preferences/Preferences.h>
+#import <UIKit/UIKit.h>
 
-@interface RootListController : PSListController
+@interface RootListController : NSObject
 @end
