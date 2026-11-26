@@ -2,12 +2,10 @@
 #import <Foundation/Foundation.h>
 #import <CoreFoundation/CoreFoundation.h>
 
-static NSString *const kPrefsDomain = @"com.kilo.wifibruter";
 static NSString *const kLogPath = @"/var/mobile/Documents/wifibruter_log.txt";
 static NSTimeInterval kMinDelay = 0.5;
 
 static void logMessage(NSString *msg);
-static NSString *iosVersionString(void);
 static NSDictionary *loadConfig(id self);
 static NSArray *loadPasswords(id self);
 static BOOL isEnabled(id self);
@@ -26,10 +24,6 @@ static void logMessage(NSString *msg) {
         fputc('\n', f);
         fclose(f);
     }
-}
-
-static NSString *iosVersionString(void) {
-    return [[UIDevice currentDevice] systemVersion];
 }
 
 static NSDictionary *loadConfig(id self) {
