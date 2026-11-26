@@ -35,6 +35,16 @@ jobs:
       - name: Build package
         run: make package
 
+      - name: Fix deb architecture to iphoneos-arm for Sileo compatibility
+        run: |
+          DEB=$(find . -name "*.deb" | head -1)
+          DEBNAME=$(basename "$DEB")
+          mkdir -p deb-extract
+          dpkg-deb -R "$DEB" deb-extract
+          sed -i 's/Architecture: iphoneos-arm64/Architecture: iphoneos-arm/' deb-extract/DEBIAN/control
+          dpkg-deb -b deb-extract "$DEBNAME"
+          rm -rf deb-extract
+
       - name: Upload artifact
         uses: actions/upload-artifact@v4
         with:
