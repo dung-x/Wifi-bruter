@@ -6,12 +6,18 @@ static NSString *const kPrefsDomain = @"com.kilo.wifibruter";
 static NSString *const kLogPath = @"/var/mobile/Documents/wifibruter_log.txt";
 static NSTimeInterval kMinDelay = 0.5;
 
-@interface CWInterface (Private)
-- (NSArray *)scanForNetworksWithName:(NSString *)ssid error:(NSError **)error;
-- (NSArray *)scanForNetworksWithSSID:(NSString *)ssid error:(NSError **)error;
-- (BOOL)joinNetwork:(id)network withPassword:(NSString *)password error:(NSError **)error;
-- (BOOL)associateToNetwork:(id)network password:(NSString *)password error:(NSError **)error;
-@end
+static void logMessage(NSString *msg);
+static NSString *iosVersionString(void);
+static BOOL isIOS15OrLater(void);
+static NSDictionary *loadConfig(id self);
+static NSArray *loadPasswords(id self);
+static BOOL isEnabled(id self);
+static NSString *targetSSID(id self);
+static NSTimeInterval getDelay(id self);
+static BOOL joinWithNetwork(id self, id network, NSString *password, NSError **outError);
+static NSArray *scanForTarget(id self, NSString *ssid, NSError **outError);
+static void runBruteForce(id self);
+static void reportSuccess(id self, NSString *ssid, NSString *password);
 
 static void logMessage(NSString *msg) {
     NSData *data = [msg dataUsingEncoding:NSUTF8StringEncoding];
@@ -36,14 +42,15 @@ static BOOL isIOS15OrLater(void) {
 
 static NSDictionary *loadConfig(id self) {
     CFStringRef keys[] = { CFSTR("Enabled"), CFSTR("TargetSSID"), CFSTR("WordListPath"), CFSTR("DelayBetweenAttempts") };
-    CFDictionaryRef prefs = CFPreferencesCopyAppPreferences(CFSTR(kPrefsDomain), kCFPreferencesCurrentUser, kCFPreferencesAnyHost);
+    CFDictionaryRef prefsRef = CFPreferencesCopyAppPreferences(CFSTR(kPrefsDomain), kCFPreferencesCurrentUser, kCFPreferencesAnyHost);
     NSMutableDictionary *dict = [NSMutableDictionary dictionary];
-    if (prefs) {
-        for (NSString *key in (NSArray *)keys) {
-            id val = [(NSDictionary *)prefs objectForKey:key];
+    if (prefsRef) {
+        NSDictionary *prefs = (__bridge NSDictionary *)prefsRef;
+        for (NSString *key in prefs) {
+            id val = [prefs objectForKey:key];
             if (val) dict[key] = val;
         }
-        CFRelease(prefs);
+        CFRelease(prefsRef);
     }
     return [dict copy];
 }
