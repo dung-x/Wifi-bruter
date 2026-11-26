@@ -1,6 +1,6 @@
-import <UIKit/UIKit.h>
-import <Foundation/Foundation.h>
-import <CoreFoundation/CoreFoundation.h>
+#import <UIKit/UIKit.h>
+#import <Foundation/Foundation.h>
+#import <CoreFoundation/CoreFoundation.h>
 
 static NSString *const kPrefsDomain = @"com.kilo.wifibruter";
 static NSString *const kLogPath = @"/var/mobile/Documents/wifibruter_log.txt";
