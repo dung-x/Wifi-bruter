@@ -1,4 +1,4 @@
-name: Build iOS Tweak (Rootful, Rootless, Roothide)
+name: Build iOS Tweak
 
 on:
   push:
@@ -8,9 +8,6 @@ on:
 jobs:
   build:
     runs-on: macos-latest
-    strategy:
-      matrix:
-        variant: [rootful, rootless, roothide]
     steps:
       - uses: actions/checkout@v4
 
@@ -35,38 +32,11 @@ jobs:
       - name: Update Theos vendor directories
         run: $THEOS/bin/update-theos
 
-      - name: Select control file for variant
-        run: |
-          if [ "${{ matrix.variant }}" = "rootless" ]; then
-            cp control.rootless control.tmp
-          elif [ "${{ matrix.variant }}" = "roothide" ]; then
-            cp control.roothide control.tmp
-          else
-            cp control control.tmp
-          fi
-          mv control.tmp control
-
       - name: Build package
-        run: |
-          if [ "${{ matrix.variant }}" = "rootful" ]; then
-            make package
-          else
-            THEOS_PACKAGE_INSTALL_PREFIX=/var/jb make package
-          fi
-
-      - name: Rename deb for variant
-        run: |
-          DEB=$(find . -name "*.deb" | head -1)
-          if [ "${{ matrix.variant }}" = "rootful" ]; then
-            mv "$DEB" "dungx.wifibruter_1.0-1_iphoneos-arm64.deb"
-          elif [ "${{ matrix.variant }}" = "rootless" ]; then
-            mv "$DEB" "dungx.wifibruter-rootless_1.0-1_iphoneos-arm64.deb"
-          else
-            mv "$DEB" "dungx.wifibruter-roothide_1.0-1_iphoneos-arm64.deb"
-          fi
+        run: make package
 
       - name: Upload artifact
         uses: actions/upload-artifact@v4
         with:
-          name: wifibruter-deb-${{ matrix.variant }}
+          name: wifibruter-deb
           path: '*.deb'
