@@ -41,7 +41,7 @@ jobs:
           DEBNAME=$(basename "$DEB")
           mkdir -p deb-extract
           dpkg-deb -R "$DEB" deb-extract
-          sed -i 's/Architecture: iphoneos-arm64/Architecture: iphoneos-arm/' deb-extract/DEBIAN/control
+          sed -i '' 's/Architecture: iphoneos-arm64/Architecture: iphoneos-arm/' deb-extract/DEBIAN/control
           dpkg-deb -b deb-extract "$DEBNAME"
           rm -rf deb-extract
 
