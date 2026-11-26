@@ -20,7 +20,6 @@ jobs:
       - name: Install dpkg (required by Theos for deb packaging)
         run: |
           brew install dpkg
-          # Create dm.pl shim if not present (Theos internal-package-check requires it)
           if ! command -v dm.pl &> /dev/null; then
             echo '#!/usr/bin/env perl' > /opt/homebrew/bin/dm.pl
             echo 'exit 0;' >> /opt/homebrew/bin/dm.pl
@@ -33,6 +32,9 @@ jobs:
           echo "THEOS=$HOME/theos" >> $GITHUB_ENV
           echo "$HOME/theos/bin" >> $GITHUB_PATH
 
+      - name: Update Theos vendor directories
+        run: $THEOS/bin/update-theos
+
       - name: Select control file for variant
         run: |
           if [ "${{ matrix.variant }}" = "rootless" ]; then
@@ -44,20 +46,12 @@ jobs:
           fi
           mv control.tmp control
 
-      - name: Set install prefix for rootless/roothide
-        run: |
-          if [ "${{ matrix.variant }}" = "rootful" ]; then
-            echo "PREFIX=" >> $GITHUB_ENV
-          else
-            echo "PREFIX=/var/jb" >> $GITHUB_ENV
-          fi
-
       - name: Build package
         run: |
-          if [ -n "$PREFIX" ]; then
-            THEOS_PACKAGE_INSTALL_PREFIX=$PREFIX make package
-          else
+          if [ "${{ matrix.variant }}" = "rootful" ]; then
             make package
+          else
+            THEOS_PACKAGE_INSTALL_PREFIX=/var/jb make package
           fi
 
       - name: Rename deb for variant
