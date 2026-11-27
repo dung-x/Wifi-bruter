@@ -3,7 +3,4 @@
 #import <Preferences/PSListController.h>
 
 @interface RootListController : PSListController
-{
-    NSMutableArray *_specifiers;
-}
 @end
