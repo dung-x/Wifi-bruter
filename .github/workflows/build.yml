@@ -35,7 +35,7 @@ jobs:
         run: $THEOS/bin/update-theos
 
       - name: Build package
-        run: make package
+        run: THEOS_BUILD_TYPE=release make package
 
       - name: Fix deb architecture to iphoneos-arm for Sileo compatibility
         run: |
