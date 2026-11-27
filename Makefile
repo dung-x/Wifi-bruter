@@ -1,4 +1,4 @@
 include $(THEOS)/makefiles/common.mk
 
-SUBPROJECTS = WiFiBruter WiFiBruterPrefs
+SUBPROJECTS = WiFiBruter
 include $(THEOS_MAKE_PATH)/aggregate.mk
