@@ -45,8 +45,28 @@ jobs:
           dpkg-deb -b deb-extract "$DEBNAME"
           rm -rf deb-extract
 
-      - name: Upload artifact
-        uses: actions/upload-artifact@v4
+      - name: Get version from control
+        id: version
+        run: |
+          VERSION=$(dpkg-deb -f "$(find . -name '*.deb' | head -1)" Version)
+          echo "version=$VERSION" >> $GITHUB_OUTPUT
+
+      - name: Create GitHub Release
+        id: create_release
+        uses: softprops/action-gh-release@v2
         with:
-          name: wifibruter-deb
-          path: '*.deb'
+          tag_name: v${{ steps.version.outputs.version }}
+          name: WiFiBruter v${{ steps.version.outputs.version }}
+          body: |
+            WiFiBruter v${{ steps.version.outputs.version }}
+            
+            Changes:
+            - Built for iOS 12 and iOS 15 compatibility
+            - Architecture: iphoneos-arm (Sileo compatible)
+            - Settings app preference bundle
+            
+            Install: Add https://dung-x.github.io/dungxrepo/ to Sileo
+          draft: false
+          prerelease: false
+          files: |
+            *.deb
