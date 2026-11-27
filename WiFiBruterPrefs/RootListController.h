@@ -1,7 +1,8 @@
 #import <UIKit/UIKit.h>
 #import <Foundation/Foundation.h>
+#import <Preferences/PSListController.h>
 
-@interface RootListController : NSObject
+@interface RootListController : PSListController
 {
     NSMutableArray *_specifiers;
 }
