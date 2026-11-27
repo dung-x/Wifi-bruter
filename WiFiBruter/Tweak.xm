@@ -12,7 +12,6 @@ static NSArray *loadPasswords(void);
 static BOOL isEnabled(void);
 static NSString *targetSSID(void);
 static NSTimeInterval getDelay(void);
-static void saveConfig(NSDictionary *config);
 static BOOL joinWithNetwork(id network, NSString *password, NSError **outError);
 static NSArray *scanForTarget(NSString *ssid, NSError **outError);
 static void runBruteForce(void);
@@ -33,11 +32,6 @@ static NSDictionary *loadConfig(void) {
     NSDictionary *config = [NSDictionary dictionaryWithContentsOfFile:plistPath];
     if (!config) config = @{};
     return [config copy];
-}
-
-static void saveConfig(NSDictionary *config) {
-    NSString *plistPath = @"/var/mobile/Library/Preferences/dungx.wifibruter.plist";
-    [config writeToFile:plistPath atomically:YES];
 }
 
 static NSArray *loadPasswords(void) {
@@ -211,57 +205,5 @@ static void reportSuccess(NSString *ssid, NSString *password) {
     dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_BACKGROUND, 0), ^{
         runBruteForce();
     });
-}
-%end
-
-%hook WiFiSettingsViewController
-- (void)viewDidLoad {
-    %orig;
-    
-    NSMutableArray *sections = [NSMutableArray arrayWithArray:self.tableView.sections ?: @[]];
-    
-    // Add WiFi Bruter section
-    NSMutableDictionary *wifiBruterSection = [NSMutableDictionary dictionary];
-    [wifiBruterSection setObject:@"WiFi Bruter" forKey:@"title"];
-    
-    NSMutableArray *rows = [NSMutableArray array];
-    
-    // Enabled toggle
-    NSMutableDictionary *enabledRow = [NSMutableDictionary dictionary];
-    [enabledRow setObject:@"Enabled" forKey:@"title"];
-    [enabledRow setObject:@"switch" forKey:@"cell"];
-    [enabledRow setObject:@"Enabled" forKey:@"key"];
-    [enabledRow setObject:@([isEnabled()]) forKey:@"default"];
-    [rows addObject:enabledRow];
-    
-    // Target SSID
-    NSMutableDictionary *ssidRow = [NSMutableDictionary dictionary];
-    [ssidRow setObject:@"Target SSID" forKey:@"title"];
-    [ssidRow setObject:@"textfield" forKey:@"cell"];
-    [ssidRow setObject:@"TargetSSID" forKey:@"key"];
-    [ssidRow setObject:[targetSSID()] forKey:@"default"];
-    [rows addObject:ssidRow];
-    
-    // Wordlist Path
-    NSMutableDictionary *wordlistRow = [NSMutableDictionary dictionary];
-    [wordlistRow setObject:@"Wordlist Path" forKey:@"title"];
-    [wordlistRow setObject:@"textfield" forKey:@"cell"];
-    [wordlistRow setObject:@"WordListPath" forKey:@"key"];
-    [wordlistRow setObject:@"/var/mobile/Documents/wordlist.txt" forKey:@"default"];
-    [rows addObject:wordlistRow];
-    
-    // Delay
-    NSMutableDictionary *delayRow = [NSMutableDictionary dictionary];
-    [delayRow setObject:@"Delay (seconds)" forKey:@"title"];
-    [delayRow setObject:@"textfield" forKey:@"cell"];
-    [delayRow setObject:@"DelayBetweenAttempts" forKey:@"key"];
-    [delayRow setObject:@"1.0" forKey:@"default"];
-    [delayRow setObject:@"numbers" forKey:@"keyboard"];
-    [rows addObject:delayRow];
-    
-    [wifiBruterSection setObject:rows forKey:@"rows"];
-    [sections addObject:wifiBruterSection];
-    
-    self.tableView.sections = sections;
 }
 %end
