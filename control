@@ -1,7 +1,7 @@
 Package: dungx.wifibruter
 Name: WiFiBruter
 Depends: mobilesubstrate, preferenceloader
-Version: 1.0-1
+Version: 1.1-1
 Architecture: iphoneos-arm
 Section: Tweaks
 Maintainer: dungx
