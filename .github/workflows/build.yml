@@ -8,6 +8,9 @@ on:
 jobs:
   build:
     runs-on: macos-latest
+    strategy:
+      matrix:
+        arch: [iphoneos-arm, iphoneos-arm64]
     permissions:
       contents: write
     steps:
@@ -34,25 +37,39 @@ jobs:
       - name: Update Theos vendor directories
         run: $THEOS/bin/update-theos
 
-      - name: Build package
-        run: THEOS_BUILD_TYPE=release make package
+      - name: Build package for ${{ matrix.arch }}
+        run: |
+          if [ "${{ matrix.arch }}" = "iphoneos-arm" ]; then
+            WiFiBruter_ARCHS=arm64 make package
+          else
+            WiFiBruter_ARCHS=arm64 make package
+          fi
 
-      - name: Fix deb architecture and version for Sileo compatibility
+      - name: Fix deb architecture for Sileo compatibility
         run: |
           DEB=$(find . -name "*.deb" | head -1)
           DEBNAME=$(basename "$DEB")
           mkdir -p deb-extract
           dpkg-deb -R "$DEB" deb-extract
-          sed -i '' 's/Architecture: iphoneos-arm64/Architecture: iphoneos-arm/' deb-extract/DEBIAN/control
-          sed -i '' 's/Version: .*/Version: 1.2-1/' deb-extract/DEBIAN/control
+          sed -i '' "s/Architecture: iphoneos-arm64/Architecture: ${{ matrix.arch }}/" deb-extract/DEBIAN/control
+          sed -i '' 's/+debug//' deb-extract/DEBIAN/control
           dpkg-deb -b deb-extract "$DEBNAME"
           rm -rf deb-extract
+
+      - name: Rename deb for architecture
+        run: |
+          DEB=$(find . -name "*.deb" | head -1)
+          DEBNAME=$(basename "$DEB")
+          if [ "${{ matrix.arch }}" = "iphoneos-arm" ]; then
+            mv "$DEB" "dungx.wifibruter_1.2-1_iphoneos-arm.deb"
+          else
+            mv "$DEB" "dungx.wifibruter_1.2-1_iphoneos-arm64.deb"
+          fi
 
       - name: Get version from control
         id: version
         run: |
-          VERSION=$(dpkg-deb -f "$(find . -name '*.deb' | head -1)" Version)
-          echo "version=$VERSION" >> $GITHUB_OUTPUT
+          echo "version=1.2-1" >> $GITHUB_OUTPUT
 
       - name: Create GitHub Release
         id: create_release
@@ -63,10 +80,9 @@ jobs:
           body: |
             WiFiBruter v${{ steps.version.outputs.version }}
             
-            Changes:
-            - Built for iOS 12 and iOS 15 compatibility
-            - Architecture: iphoneos-arm (Sileo compatible)
-            - Settings app preference bundle
+            Architectures:
+            - iphoneos-arm (iOS 12)
+            - iphoneos-arm64 (iOS 15+)
             
             Install: Add https://dung-x.github.io/dungxrepo/ to Sileo
           draft: false
