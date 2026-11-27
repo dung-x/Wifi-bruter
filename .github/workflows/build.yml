@@ -44,36 +44,28 @@ jobs:
       - name: Build package
         run: make package
 
-      - name: Post-process deb for variant (rootless/roothide -> /var/jb prefix)
+      - name: Post-process deb for variant
         run: |
           DEB=$(find . -name "*.deb" | head -1)
           DEBNAME=$(basename "$DEB")
+          mkdir -p deb-extract
+          dpkg-deb -R "$DEB" deb-extract
+          sed -i '' 's/+debug//' deb-extract/DEBIAN/control
           
           if [ "${{ matrix.variant }}" = "rootful" ]; then
-            # Rootful: just fix architecture and remove debug suffix
-            mkdir -p deb-extract
-            dpkg-deb -R "$DEB" deb-extract
-            sed -i '' 's/+debug//' deb-extract/DEBIAN/control
-            dpkg-deb -b deb-extract "$DEBNAME"
-            rm -rf deb-extract
+            # Rootful: fix architecture to iphoneos-arm for iOS 12 compatibility
+            sed -i '' 's/Architecture: iphoneos-arm64/Architecture: iphoneos-arm/' deb-extract/DEBIAN/control
           else
-            # Rootless/Roothide: change install paths from / to /var/jb
-            mkdir -p deb-extract
-            dpkg-deb -R "$DEB" deb-extract
-            
-            # Fix architecture
-            sed -i '' 's/+debug//' deb-extract/DEBIAN/control
-            
-            # Move Library/MobileSubstrate to var/jb/Library/MobileSubstrate
+            # Rootless/Roothide: move files from / to /var/jb
             if [ -d "deb-extract/Library" ]; then
               mkdir -p deb-extract/var/jb/Library
               mv deb-extract/Library/* deb-extract/var/jb/Library/
               rm -rf deb-extract/Library
             fi
-            
-            dpkg-deb -b deb-extract "$DEBNAME"
-            rm -rf deb-extract
           fi
+          
+          dpkg-deb -b deb-extract "$DEBNAME"
+          rm -rf deb-extract
 
       - name: Rename deb for variant
         run: |
@@ -81,7 +73,7 @@ jobs:
           DEBNAME=$(basename "$DEB")
           VERSION=$(grep "^Version:" control | awk '{print $2}')
           if [ "${{ matrix.variant }}" = "rootful" ]; then
-            mv "$DEB" "dungx.wifibruter_${VERSION}_iphoneos-arm64.deb"
+            mv "$DEB" "dungx.wifibruter_${VERSION}_iphoneos-arm.deb"
           elif [ "${{ matrix.variant }}" = "rootless" ]; then
             mv "$DEB" "dungx.wifibruter-rootless_${VERSION}_iphoneos-arm64.deb"
           else
