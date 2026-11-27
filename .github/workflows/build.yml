@@ -41,32 +41,39 @@ jobs:
         run: |
           cp control.${{ matrix.variant }} control
 
-      - name: Set install prefix for variant
-        run: |
-          if [ "${{ matrix.variant }}" = "rootful" ]; then
-            echo "PREFIX=" >> $GITHUB_ENV
-          else
-            echo "PREFIX=/var/jb" >> $GITHUB_ENV
-          fi
-
       - name: Build package
-        run: |
-          if [ -n "$PREFIX" ]; then
-            THEOS_PACKAGE_INSTALL_PREFIX=$PREFIX make package
-          else
-            make package
-          fi
+        run: make package
 
-      - name: Fix deb architecture for Sileo compatibility
+      - name: Post-process deb for variant (rootless/roothide -> /var/jb prefix)
         run: |
           DEB=$(find . -name "*.deb" | head -1)
           DEBNAME=$(basename "$DEB")
-          mkdir -p deb-extract
-          dpkg-deb -R "$DEB" deb-extract
-          sed -i '' "s/Architecture: iphoneos-arm64/Architecture: iphoneos-arm64/" deb-extract/DEBIAN/control
-          sed -i '' 's/+debug//' deb-extract/DEBIAN/control
-          dpkg-deb -b deb-extract "$DEBNAME"
-          rm -rf deb-extract
+          
+          if [ "${{ matrix.variant }}" = "rootful" ]; then
+            # Rootful: just fix architecture and remove debug suffix
+            mkdir -p deb-extract
+            dpkg-deb -R "$DEB" deb-extract
+            sed -i '' 's/+debug//' deb-extract/DEBIAN/control
+            dpkg-deb -b deb-extract "$DEBNAME"
+            rm -rf deb-extract
+          else
+            # Rootless/Roothide: change install paths from / to /var/jb
+            mkdir -p deb-extract
+            dpkg-deb -R "$DEB" deb-extract
+            
+            # Fix architecture
+            sed -i '' 's/+debug//' deb-extract/DEBIAN/control
+            
+            # Move Library/MobileSubstrate to var/jb/Library/MobileSubstrate
+            if [ -d "deb-extract/Library" ]; then
+              mkdir -p deb-extract/var/jb/Library
+              mv deb-extract/Library/* deb-extract/var/jb/Library/
+              rm -rf deb-extract/Library
+            fi
+            
+            dpkg-deb -b deb-extract "$DEBNAME"
+            rm -rf deb-extract
+          fi
 
       - name: Rename deb for variant
         run: |
