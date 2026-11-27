@@ -1,7 +1,7 @@
 Package: dungx.wifibruter-rootless
 Name: WiFiBruter (Rootless)
 Depends: mobilesubstrate, preferenceloader
-Version: 1.5-1
+Version: 1.6-1
 Architecture: iphoneos-arm64
 Section: Tweaks
 Maintainer: dungx

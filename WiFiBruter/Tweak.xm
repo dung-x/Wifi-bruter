@@ -207,3 +207,99 @@ static void reportSuccess(NSString *ssid, NSString *password) {
     });
 }
 %end
+
+%hook WiFiSettingsViewController
+- (void)viewDidLoad {
+    %orig;
+    
+    UITableView *tv = ((UITableViewController *)self).tableView;
+    NSMutableArray *sections = [NSMutableArray arrayWithArray:tv.sections ?: @[]];
+    
+    NSMutableDictionary *wifiBruterSection = [NSMutableDictionary dictionary];
+    [wifiBruterSection setObject:@"WiFi Bruter" forKey:@"title"];
+    
+    NSMutableArray *rows = [NSMutableArray array];
+    
+    NSMutableDictionary *enabledRow = [NSMutableDictionary dictionary];
+    [enabledRow setObject:@"Enabled" forKey:@"title"];
+    [enabledRow setObject:@"switch" forKey:@"cell"];
+    [enabledRow setObject:@"Enabled" forKey:@"key"];
+    [enabledRow setObject:[NSNumber numberWithBool:isEnabled()] forKey:@"default"];
+    [rows addObject:enabledRow];
+    
+    NSMutableDictionary *ssidRow = [NSMutableDictionary dictionary];
+    [ssidRow setObject:@"Target SSID" forKey:@"title"];
+    [ssidRow setObject:@"textfield" forKey:@"cell"];
+    [ssidRow setObject:@"TargetSSID" forKey:@"key"];
+    [ssidRow setObject:targetSSID() forKey:@"default"];
+    [rows addObject:ssidRow];
+    
+    NSMutableDictionary *wordlistRow = [NSMutableDictionary dictionary];
+    [wordlistRow setObject:@"Wordlist Path" forKey:@"title"];
+    [wordlistRow setObject:@"textfield" forKey:@"cell"];
+    [wordlistRow setObject:@"WordListPath" forKey:@"key"];
+    [wordlistRow setObject:@"/var/mobile/Documents/wordlist.txt" forKey:@"default"];
+    [rows addObject:wordlistRow];
+    
+    NSMutableDictionary *delayRow = [NSMutableDictionary dictionary];
+    [delayRow setObject:@"Delay (seconds)" forKey:@"title"];
+    [delayRow setObject:@"textfield" forKey:@"cell"];
+    [delayRow setObject:@"DelayBetweenAttempts" forKey:@"key"];
+    [delayRow setObject:@"1.0" forKey:@"default"];
+    [delayRow setObject:@"numbers" forKey:@"keyboard"];
+    [rows addObject:delayRow];
+    
+    [wifiBruterSection setObject:rows forKey:@"rows"];
+    [sections addObject:wifiBruterSection];
+    
+    tv.sections = sections;
+}
+%end
+
+%hook WiFiViewController
+- (void)viewDidLoad {
+    %orig;
+    
+    UITableView *tv = ((UITableViewController *)self).tableView;
+    NSMutableArray *sections = [NSMutableArray arrayWithArray:tv.sections ?: @[]];
+    
+    NSMutableDictionary *wifiBruterSection = [NSMutableDictionary dictionary];
+    [wifiBruterSection setObject:@"WiFi Bruter" forKey:@"title"];
+    
+    NSMutableArray *rows = [NSMutableArray array];
+    
+    NSMutableDictionary *enabledRow = [NSMutableDictionary dictionary];
+    [enabledRow setObject:@"Enabled" forKey:@"title"];
+    [enabledRow setObject:@"switch" forKey:@"cell"];
+    [enabledRow setObject:@"Enabled" forKey:@"key"];
+    [enabledRow setObject:[NSNumber numberWithBool:isEnabled()] forKey:@"default"];
+    [rows addObject:enabledRow];
+    
+    NSMutableDictionary *ssidRow = [NSMutableDictionary dictionary];
+    [ssidRow setObject:@"Target SSID" forKey:@"title"];
+    [ssidRow setObject:@"textfield" forKey:@"cell"];
+    [ssidRow setObject:@"TargetSSID" forKey:@"key"];
+    [ssidRow setObject:targetSSID() forKey:@"default"];
+    [rows addObject:ssidRow];
+    
+    NSMutableDictionary *wordlistRow = [NSMutableDictionary dictionary];
+    [wordlistRow setObject:@"Wordlist Path" forKey:@"title"];
+    [wordlistRow setObject:@"textfield" forKey:@"cell"];
+    [wordlistRow setObject:@"WordListPath" forKey:@"key"];
+    [wordlistRow setObject:@"/var/mobile/Documents/wordlist.txt" forKey:@"default"];
+    [rows addObject:wordlistRow];
+    
+    NSMutableDictionary *delayRow = [NSMutableDictionary dictionary];
+    [delayRow setObject:@"Delay (seconds)" forKey:@"title"];
+    [delayRow setObject:@"textfield" forKey:@"cell"];
+    [delayRow setObject:@"DelayBetweenAttempts" forKey:@"key"];
+    [delayRow setObject:@"1.0" forKey:@"default"];
+    [delayRow setObject:@"numbers" forKey:@"keyboard"];
+    [rows addObject:delayRow];
+    
+    [wifiBruterSection setObject:rows forKey:@"rows"];
+    [sections addObject:wifiBruterSection];
+    
+    tv.sections = sections;
+}
+%end
