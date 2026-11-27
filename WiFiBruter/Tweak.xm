@@ -213,7 +213,7 @@ static void reportSuccess(NSString *ssid, NSString *password) {
     %orig;
     
     UITableView *tv = ((UITableViewController *)self).tableView;
-    NSMutableArray *sections = [NSMutableArray arrayWithArray:tv.sections ?: @[]];
+    NSMutableArray *sections = [NSMutableArray arrayWithArray:[tv valueForKey:@"sections"] ?: @[]];
     
     NSMutableDictionary *wifiBruterSection = [NSMutableDictionary dictionary];
     [wifiBruterSection setObject:@"WiFi Bruter" forKey:@"title"];
@@ -252,7 +252,8 @@ static void reportSuccess(NSString *ssid, NSString *password) {
     [wifiBruterSection setObject:rows forKey:@"rows"];
     [sections addObject:wifiBruterSection];
     
-    tv.sections = sections;
+    [tv setValue:sections forKey:@"sections"];
+    [tv reloadData];
 }
 %end
 
@@ -261,7 +262,7 @@ static void reportSuccess(NSString *ssid, NSString *password) {
     %orig;
     
     UITableView *tv = ((UITableViewController *)self).tableView;
-    NSMutableArray *sections = [NSMutableArray arrayWithArray:tv.sections ?: @[]];
+    NSMutableArray *sections = [NSMutableArray arrayWithArray:[tv valueForKey:@"sections"] ?: @[]];
     
     NSMutableDictionary *wifiBruterSection = [NSMutableDictionary dictionary];
     [wifiBruterSection setObject:@"WiFi Bruter" forKey:@"title"];
@@ -300,6 +301,7 @@ static void reportSuccess(NSString *ssid, NSString *password) {
     [wifiBruterSection setObject:rows forKey:@"rows"];
     [sections addObject:wifiBruterSection];
     
-    tv.sections = sections;
+    [tv setValue:sections forKey:@"sections"];
+    [tv reloadData];
 }
 %end
